@@ -58,6 +58,103 @@ Manual test:
 curl http://localhost:3000/ping
 ```
 
+### `POST /echo`
+
+Echoes the exact JSON body that was sent. This endpoint intentionally does not use the standard response wrapper because API Quest Level 2 requires the same JSON back.
+
+Manual test:
+
+```bash
+curl -X POST http://localhost:3000/echo \
+  -H "Content-Type: application/json" \
+  -d "{\"hello\":\"world\"}"
+```
+
+Expected:
+
+```json
+{
+  "hello": "world"
+}
+```
+
+Empty object test:
+
+```bash
+curl -X POST http://localhost:3000/echo \
+  -H "Content-Type: application/json" \
+  -d "{}"
+```
+
+Expected:
+
+```json
+{}
+```
+
+### `POST /books`
+
+Creates a book and returns the raw created object. This endpoint intentionally does not use the standard response wrapper because API Quest Level 3 expects raw JSON.
+
+Manual test:
+
+```bash
+curl -X POST http://localhost:3000/books \
+  -H "Content-Type: application/json" \
+  -d "{\"title\":\"Clean Code\",\"author\":\"Robert C. Martin\",\"year\":2008}"
+```
+
+Expected status:
+
+```http
+201 Created
+```
+
+Expected body:
+
+```json
+{
+  "id": 1,
+  "title": "Clean Code",
+  "author": "Robert C. Martin",
+  "year": 2008
+}
+```
+
+### `GET /books`
+
+Returns a raw array.
+
+```bash
+curl http://localhost:3000/books
+```
+
+### `GET /books/:id`
+
+Returns one raw book object.
+
+```bash
+curl http://localhost:3000/books/1
+```
+
+### `PUT /books/:id`
+
+Updates a book and returns the raw updated object.
+
+```bash
+curl -X PUT http://localhost:3000/books/1 \
+  -H "Content-Type: application/json" \
+  -d "{\"title\":\"Dune Updated\",\"author\":\"Frank Herbert\",\"year\":1965}"
+```
+
+### `DELETE /books/:id`
+
+Deletes a book and returns `204 No Content`.
+
+```bash
+curl -X DELETE http://localhost:3000/books/1
+```
+
 ### Unknown Route
 
 Returns:
@@ -232,6 +329,18 @@ After deployment, test the public URL before submitting:
 ```bash
 curl https://your-api-url.com/health
 curl https://your-api-url.com/ping
+curl -X POST https://your-api-url.com/echo \
+  -H "Content-Type: application/json" \
+  -d "{\"hello\":\"world\"}"
+curl -X POST https://your-api-url.com/books \
+  -H "Content-Type: application/json" \
+  -d "{\"title\":\"Clean Code\",\"author\":\"Robert C. Martin\",\"year\":2008}"
+curl https://your-api-url.com/books
+curl https://your-api-url.com/books/1
+curl -X PUT https://your-api-url.com/books/1 \
+  -H "Content-Type: application/json" \
+  -d "{\"title\":\"Dune Updated\",\"author\":\"Frank Herbert\",\"year\":1965}"
+curl -X DELETE https://your-api-url.com/books/1
 curl "https://your-api-url.com/items?page=1&limit=10"
 curl https://your-api-url.com/protected \
   -H "Authorization: Bearer api-quest-secret"

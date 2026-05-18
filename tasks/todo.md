@@ -375,3 +375,237 @@ Deployment:
 ### Final Review
 
 Local implementation is complete through the planned challenge phases: health, ping, CRUD, validation, pagination, auth, JSON errors, tests, docs, and deployment readiness. Remaining unchecked items require a public deployment URL.
+
+## Correction: Level 2 Echo Endpoint
+
+- [x] Implement exact `POST /echo` route.
+- [x] Return `req.body` directly with status `200`.
+- [x] Do not wrap echo responses in the standard response format.
+- [x] Test normal JSON object echo.
+- [x] Test empty object echo.
+- [x] Verify locally with curl-style requests.
+
+### Echo Endpoint
+
+Method and path:
+
+```http
+POST /echo
+```
+
+Purpose:
+
+Parse a JSON body and return the exact same JSON body.
+
+Success response:
+
+```http
+200 OK
+```
+
+Request:
+
+```json
+{
+  "hello": "world"
+}
+```
+
+Response:
+
+```json
+{
+  "hello": "world"
+}
+```
+
+### Echo Verification
+
+Automated:
+
+```bash
+npm test
+```
+
+Result:
+
+```text
+Test Suites: 6 passed, 6 total
+Tests: 26 passed, 26 total
+```
+
+Manual local checks on port `3105`:
+
+| Check | Result |
+| --- | --- |
+| `POST /echo` with `{"hello":"world"}` | 200, `{"hello":"world"}` |
+| `POST /echo` with `{}` | 200, `{}` |
+
+## Correction: Level 3 Books Endpoint
+
+- [x] Implement exact `POST /books` route.
+- [x] Implement exact `GET /books` route returning a raw array.
+- [x] Implement exact `GET /books/:id` route returning a raw book object.
+- [x] Use numeric `id` values.
+- [x] Do not wrap book responses in the standard response format.
+- [x] Test created book response shape.
+- [x] Test list response is an array.
+- [x] Test get-by-id response shape.
+- [x] Verify locally with curl-style requests.
+
+### Books Endpoint Contract
+
+Create:
+
+```http
+POST /books
+```
+
+Request:
+
+```json
+{
+  "title": "Clean Code",
+  "author": "Robert C. Martin",
+  "year": 2008
+}
+```
+
+Response:
+
+```http
+201 Created
+```
+
+```json
+{
+  "id": 1,
+  "title": "Clean Code",
+  "author": "Robert C. Martin",
+  "year": 2008
+}
+```
+
+List:
+
+```http
+GET /books
+```
+
+Response must be a raw array:
+
+```json
+[
+  {
+    "id": 1,
+    "title": "Clean Code",
+    "author": "Robert C. Martin",
+    "year": 2008
+  }
+]
+```
+
+### Books Verification
+
+Automated:
+
+```bash
+npm test
+```
+
+Result:
+
+```text
+Test Suites: 7 passed, 7 total
+Tests: 30 passed, 30 total
+```
+
+Manual local checks on port `3106`:
+
+| Check | Result |
+| --- | --- |
+| `POST /books` | 201, raw book with numeric `id` |
+| `GET /books` | 200, raw array |
+| `GET /books/1` | 200, raw book object |
+| `GET /books/999` | 404 |
+
+## Correction: Level 4 Book Update/Delete
+
+- [x] Implement exact `PUT /books/:id` route.
+- [x] Implement exact `DELETE /books/:id` route.
+- [x] Preserve numeric `id` on update.
+- [x] Persist updates in the same books array.
+- [x] Remove deleted books from the same books array.
+- [x] Return `204` with no body for successful delete.
+- [x] Return raw `{ "error": "Book not found" }` for missing update/delete targets.
+- [x] Verify locally with curl-style create, update, get, delete, get sequence.
+
+### Book Update/Delete Contract
+
+Update:
+
+```http
+PUT /books/1
+```
+
+Request:
+
+```json
+{
+  "title": "Dune Updated",
+  "author": "Frank Herbert",
+  "year": 1965
+}
+```
+
+Response:
+
+```http
+200 OK
+```
+
+```json
+{
+  "id": 1,
+  "title": "Dune Updated",
+  "author": "Frank Herbert",
+  "year": 1965
+}
+```
+
+Delete:
+
+```http
+DELETE /books/1
+```
+
+Response:
+
+```http
+204 No Content
+```
+
+### Book Update/Delete Verification
+
+Automated:
+
+```bash
+npm test
+```
+
+Result:
+
+```text
+Test Suites: 7 passed, 7 total
+Tests: 36 passed, 36 total
+```
+
+Manual local checks on port `3107`:
+
+| Check | Result |
+| --- | --- |
+| `POST /books` | 201 |
+| `PUT /books/1` | 200 |
+| `GET /books/1` after update | title is `Dune Updated` |
+| `DELETE /books/1` | 204 |
+| `GET /books/1` after delete | 404 |
