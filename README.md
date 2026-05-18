@@ -58,6 +58,40 @@ Manual test:
 curl http://localhost:3000/ping
 ```
 
+### `POST /echo`
+
+Echoes the exact JSON body that was sent. This endpoint intentionally does not use the standard response wrapper because API Quest Level 2 requires the same JSON back.
+
+Manual test:
+
+```bash
+curl -X POST http://localhost:3000/echo \
+  -H "Content-Type: application/json" \
+  -d "{\"hello\":\"world\"}"
+```
+
+Expected:
+
+```json
+{
+  "hello": "world"
+}
+```
+
+Empty object test:
+
+```bash
+curl -X POST http://localhost:3000/echo \
+  -H "Content-Type: application/json" \
+  -d "{}"
+```
+
+Expected:
+
+```json
+{}
+```
+
 ### Unknown Route
 
 Returns:
@@ -232,6 +266,9 @@ After deployment, test the public URL before submitting:
 ```bash
 curl https://your-api-url.com/health
 curl https://your-api-url.com/ping
+curl -X POST https://your-api-url.com/echo \
+  -H "Content-Type: application/json" \
+  -d "{\"hello\":\"world\"}"
 curl "https://your-api-url.com/items?page=1&limit=10"
 curl https://your-api-url.com/protected \
   -H "Authorization: Bearer api-quest-secret"

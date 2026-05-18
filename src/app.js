@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 
+const echoRoutes = require("./routes/echo.routes");
 const healthRoutes = require("./routes/health.routes");
 const itemsRoutes = require("./routes/items.routes");
 const pingRoutes = require("./routes/ping.routes");
@@ -18,6 +19,7 @@ if (process.env.NODE_ENV !== "test") {
   app.use(morgan("dev"));
 }
 
+app.use("/echo", echoRoutes);
 app.use("/health", healthRoutes);
 app.use("/ping", pingRoutes);
 app.use("/items", itemsRoutes);
