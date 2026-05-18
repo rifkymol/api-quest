@@ -680,3 +680,70 @@ Manual local checks on port `3108`:
 | `POST /auth/token` with wrong password | 401, `{"error":"Invalid credentials"}` |
 | `GET /books` without token | 401, `{"error":"Unauthorized"}` |
 | `GET /books` with `Bearer api-quest-token` | 200, raw array |
+
+## Correction: Level 6 Search & Paginate
+
+- [x] Keep `GET /books` protected with `Authorization: Bearer api-quest-token`.
+- [x] Keep `GET /books` successful response as a raw array.
+- [x] Filter `GET /books?author=x` by exact author match, case-insensitive.
+- [x] Paginate `GET /books?page=1&limit=2` by slicing results.
+- [x] Return different page 2 results when enough books exist.
+- [x] Support combined author and pagination query params.
+- [x] Return `400` with `{ "error": "Invalid pagination parameters" }` for invalid pagination.
+- [x] Verify locally with token, seed books, author filter, pagination, and invalid pagination.
+
+### Search & Paginate Contract
+
+Author filter:
+
+```http
+GET /books?author=George%20Orwell
+Authorization: Bearer api-quest-token
+```
+
+Response:
+
+```json
+[
+  {
+    "id": 1,
+    "title": "1984",
+    "author": "George Orwell",
+    "year": 1949
+  }
+]
+```
+
+Pagination:
+
+```http
+GET /books?page=1&limit=2
+Authorization: Bearer api-quest-token
+```
+
+Response must be a raw array with at most `limit` items.
+
+### Search & Paginate Verification
+
+Automated:
+
+```bash
+npm test
+```
+
+Result:
+
+```text
+Test Suites: 8 passed, 8 total
+Tests: 44 passed, 44 total
+```
+
+Manual local checks on port `3109`:
+
+| Check | Result |
+| --- | --- |
+| `POST /auth/token` | `{"token":"api-quest-token"}` |
+| `GET /books?author=George%20Orwell` | 200, raw array with only George Orwell books |
+| `GET /books?page=1&limit=2` | 200, raw array with 2 books |
+| `GET /books?page=2&limit=2` | 200, raw array with different next book |
+| `GET /books?page=0&limit=2` | 400, `{"error":"Invalid pagination parameters"}` |

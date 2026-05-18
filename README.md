@@ -125,8 +125,16 @@ Expected body:
 
 Returns a raw array. Requires `Authorization: Bearer api-quest-token`.
 
+Supports exact author filtering and pagination:
+
 ```bash
 curl http://localhost:3000/books \
+  -H "Authorization: Bearer api-quest-token"
+
+curl "http://localhost:3000/books?author=George%20Orwell" \
+  -H "Authorization: Bearer api-quest-token"
+
+curl "http://localhost:3000/books?page=1&limit=2" \
   -H "Authorization: Bearer api-quest-token"
 ```
 
@@ -366,6 +374,10 @@ curl -X POST https://your-api-url.com/auth/token \
   -H "Content-Type: application/json" \
   -d "{\"username\":\"admin\",\"password\":\"password\"}"
 curl https://your-api-url.com/books \
+  -H "Authorization: Bearer api-quest-token"
+curl "https://your-api-url.com/books?author=George%20Orwell" \
+  -H "Authorization: Bearer api-quest-token"
+curl "https://your-api-url.com/books?page=1&limit=2" \
   -H "Authorization: Bearer api-quest-token"
 curl https://your-api-url.com/books/1
 curl -X PUT https://your-api-url.com/books/1 \

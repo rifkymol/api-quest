@@ -70,6 +70,109 @@ describe("books API", () => {
     });
   });
 
+  test("GET /books filters by exact author match case-insensitively", async () => {
+    await request(app).post("/books").send({
+      title: "1984",
+      author: "George Orwell",
+      year: 1949
+    });
+    await request(app).post("/books").send({
+      title: "Animal Farm",
+      author: "George Orwell",
+      year: 1945
+    });
+    await request(app).post("/books").send({
+      title: "Dune",
+      author: "Frank Herbert",
+      year: 1965
+    });
+
+    const response = await request(app)
+      .get("/books?author=george%20orwell")
+      .set("Authorization", "Bearer api-quest-token");
+
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body).toHaveLength(2);
+    expect(response.body.every((book) => book.author === "George Orwell")).toBe(true);
+  });
+
+  test("GET /books paginates raw array results", async () => {
+    await request(app).post("/books").send({
+      title: "1984",
+      author: "George Orwell",
+      year: 1949
+    });
+    await request(app).post("/books").send({
+      title: "Animal Farm",
+      author: "George Orwell",
+      year: 1945
+    });
+    await request(app).post("/books").send({
+      title: "Dune",
+      author: "Frank Herbert",
+      year: 1965
+    });
+
+    const pageOne = await request(app)
+      .get("/books?page=1&limit=2")
+      .set("Authorization", "Bearer api-quest-token");
+    const pageTwo = await request(app)
+      .get("/books?page=2&limit=2")
+      .set("Authorization", "Bearer api-quest-token");
+
+    expect(pageOne.status).toBe(200);
+    expect(pageTwo.status).toBe(200);
+    expect(Array.isArray(pageOne.body)).toBe(true);
+    expect(Array.isArray(pageTwo.body)).toBe(true);
+    expect(pageOne.body).toHaveLength(2);
+    expect(pageTwo.body).toHaveLength(1);
+    expect(pageOne.body).not.toEqual(pageTwo.body);
+  });
+
+  test("GET /books combines author filter and pagination", async () => {
+    await request(app).post("/books").send({
+      title: "1984",
+      author: "George Orwell",
+      year: 1949
+    });
+    await request(app).post("/books").send({
+      title: "Animal Farm",
+      author: "George Orwell",
+      year: 1945
+    });
+    await request(app).post("/books").send({
+      title: "Dune",
+      author: "Frank Herbert",
+      year: 1965
+    });
+
+    const response = await request(app)
+      .get("/books?author=George%20Orwell&page=1&limit=1")
+      .set("Authorization", "Bearer api-quest-token");
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([
+      {
+        id: 1,
+        title: "1984",
+        author: "George Orwell",
+        year: 1949
+      }
+    ]);
+  });
+
+  test("GET /books returns 400 for invalid pagination", async () => {
+    const response = await request(app)
+      .get("/books?page=0&limit=2")
+      .set("Authorization", "Bearer api-quest-token");
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      error: "Invalid pagination parameters"
+    });
+  });
+
   test("GET /books/:id returns one raw book object", async () => {
     await request(app)
       .post("/books")

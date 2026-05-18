@@ -40,7 +40,37 @@ router.post("/", (req, res) => {
 });
 
 router.get("/", booksAuthGuard, (req, res) => {
-  return res.status(200).json(booksStore.books);
+  let result = [...booksStore.books];
+  const { author, page, limit } = req.query;
+
+  if (author !== undefined) {
+    result = result.filter((book) => {
+      return String(book.author).toLowerCase() === String(author).toLowerCase();
+    });
+  }
+
+  if (page !== undefined || limit !== undefined) {
+    const parsedPage = Number(page || 1);
+    const parsedLimit = Number(limit || 10);
+
+    if (
+      !Number.isInteger(parsedPage) ||
+      parsedPage < 1 ||
+      !Number.isInteger(parsedLimit) ||
+      parsedLimit < 1
+    ) {
+      return res.status(400).json({
+        error: "Invalid pagination parameters"
+      });
+    }
+
+    const startIndex = (parsedPage - 1) * parsedLimit;
+    const endIndex = startIndex + parsedLimit;
+
+    result = result.slice(startIndex, endIndex);
+  }
+
+  return res.status(200).json(result);
 });
 
 router.get("/:id", (req, res) => {
