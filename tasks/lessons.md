@@ -6,3 +6,4 @@
 - When a later level extends an earlier resource, update the same in-memory store and add persistence tests across create, update, delete, and get-by-id.
 - When a challenge level adds auth, protect only the exact endpoints named in the level. For Level 5, only `GET /books` is protected; other `/books` methods keep their previous behavior.
 - For protected query levels, keep the auth guard and successful raw response shape while changing only the selection logic. Filtering and pagination should operate on a copied array before returning raw JSON.
+- For error-handling levels, patch only the failing validation path when 404 behavior already passes. Validate before mutating in-memory stores so bad requests do not consume IDs or create partial records.

@@ -121,6 +121,18 @@ Expected body:
 }
 ```
 
+Invalid book payloads return:
+
+```http
+400 Bad Request
+```
+
+```json
+{
+  "error": "Invalid book data"
+}
+```
+
 ### `GET /books`
 
 Returns a raw array. Requires `Authorization: Bearer api-quest-token`.

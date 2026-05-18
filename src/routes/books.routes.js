@@ -24,7 +24,24 @@ function booksAuthGuard(req, res, next) {
   return next();
 }
 
+function isValidBookPayload(body) {
+  return (
+    body &&
+    typeof body.title === "string" &&
+    body.title.trim() !== "" &&
+    typeof body.author === "string" &&
+    body.author.trim() !== "" &&
+    body.year !== undefined
+  );
+}
+
 router.post("/", (req, res) => {
+  if (!isValidBookPayload(req.body)) {
+    return res.status(400).json({
+      error: "Invalid book data"
+    });
+  }
+
   const { title, author, year } = req.body;
   const book = {
     id: booksStore.nextBookId,

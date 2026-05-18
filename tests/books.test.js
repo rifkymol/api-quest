@@ -25,6 +25,48 @@ describe("books API", () => {
     });
   });
 
+  test("POST /books without title returns 400", async () => {
+    const response = await request(app)
+      .post("/books")
+      .send({
+        author: "George Orwell",
+        year: 1949
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      error: "Invalid book data"
+    });
+  });
+
+  test("POST /books without author returns 400", async () => {
+    const response = await request(app)
+      .post("/books")
+      .send({
+        title: "1984",
+        year: 1949
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      error: "Invalid book data"
+    });
+  });
+
+  test("POST /books without year returns 400", async () => {
+    const response = await request(app)
+      .post("/books")
+      .send({
+        title: "1984",
+        author: "George Orwell"
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      error: "Invalid book data"
+    });
+  });
+
   test("GET /books without token returns 401", async () => {
     const response = await request(app).get("/books");
 

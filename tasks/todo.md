@@ -747,3 +747,65 @@ Manual local checks on port `3109`:
 | `GET /books?page=1&limit=2` | 200, raw array with 2 books |
 | `GET /books?page=2&limit=2` | 200, raw array with different next book |
 | `GET /books?page=0&limit=2` | 400, `{"error":"Invalid pagination parameters"}` |
+
+## Correction: Level 7 Book Create Validation
+
+- [x] Add validation to `POST /books` only.
+- [x] Return `400` with `{ "error": "Invalid book data" }` when `title` is missing or empty.
+- [x] Return `400` with `{ "error": "Invalid book data" }` when `author` is missing or empty.
+- [x] Return `400` with `{ "error": "Invalid book data" }` when `year` is missing.
+- [x] Keep valid `POST /books` response shape unchanged.
+- [x] Keep existing 404 behavior unchanged.
+- [x] Verify locally with missing title, missing author, valid create, missing book, and missing PUT target.
+
+### Book Create Validation Contract
+
+Invalid request:
+
+```http
+POST /books
+```
+
+```json
+{
+  "author": "George Orwell",
+  "year": 1949
+}
+```
+
+Response:
+
+```http
+400 Bad Request
+```
+
+```json
+{
+  "error": "Invalid book data"
+}
+```
+
+### Book Create Validation Verification
+
+Automated:
+
+```bash
+npm test
+```
+
+Result:
+
+```text
+Test Suites: 8 passed, 8 total
+Tests: 47 passed, 47 total
+```
+
+Manual local checks on port `3110`:
+
+| Check | Result |
+| --- | --- |
+| `POST /books` missing title | 400, `{"error":"Invalid book data"}` |
+| `POST /books` missing author | 400, `{"error":"Invalid book data"}` |
+| `POST /books` valid body | 201 |
+| `GET /books/nonexistent` | 404 |
+| `PUT /books/nonexistent` | 404 |
