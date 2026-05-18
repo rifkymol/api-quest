@@ -810,19 +810,17 @@ Manual local checks on port `3110`:
 | `GET /books/nonexistent` | 404 |
 | `PUT /books/nonexistent` | 404 |
 
-## Correction: Cumulative GET /books Compatibility
+## Correction: Deterministic GET /books
 
-- [x] Allow the first unauthenticated `GET /books` after server start to return a raw array.
-- [x] Return `401` with `{ "error": "Unauthorized" }` for later unauthenticated `GET /books`.
-- [x] Always allow `GET /books` with `Authorization: Bearer api-quest-token`.
+- [x] Remove request-count-dependent `/books` behavior.
+- [x] Remove `publicBooksReadUsed` state.
+- [x] Return a raw array for every unauthenticated `GET /books`.
+- [x] Continue accepting token headers on `GET /books`.
 - [x] Keep search and pagination returning raw arrays.
 - [x] Keep invalid pagination behavior unchanged.
-- [x] Reset the compatibility flag in tests.
-- [x] Verify locally with first unauthenticated read, second unauthenticated read, token read, pagination, and author filter.
+- [x] Verify locally with repeated unauthenticated reads, create, get-by-id, search, and pagination.
 
-### Cumulative Compatibility Contract
-
-First unauthenticated list:
+### Deterministic Books List Contract
 
 ```http
 GET /books
@@ -838,25 +836,7 @@ Response:
 []
 ```
 
-Later unauthenticated list:
-
-```http
-GET /books
-```
-
-Response:
-
-```http
-401 Unauthorized
-```
-
-```json
-{
-  "error": "Unauthorized"
-}
-```
-
-### Cumulative Compatibility Verification
+Repeated calls must keep returning a raw array and must not depend on prior request count.
 
 Automated:
 
@@ -875,10 +855,9 @@ Manual local checks on fresh server runs:
 
 | Check | Result |
 | --- | --- |
-| first unauthenticated `GET /books` body | `[]` |
-| first unauthenticated `GET /books` status after seeded books | 200 |
-| second unauthenticated `GET /books` | 401, `{"error":"Unauthorized"}` |
-| `POST /auth/token` | `{"token":"api-quest-token"}` |
-| authenticated `GET /books` | 200, raw array |
-| authenticated pagination | 200, raw array with max 2 |
-| authenticated author filter | 200, raw array with matching authors |
+| first unauthenticated `GET /books` | 200, `[]` |
+| `POST /books` valid body | 201 |
+| repeated unauthenticated `GET /books` | 200, raw array |
+| `GET /books/1` | 200 |
+| unauthenticated pagination | 200, raw array with max 2 |
+| unauthenticated author filter | 200, raw array with matching authors |

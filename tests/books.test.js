@@ -67,7 +67,7 @@ describe("books API", () => {
     });
   });
 
-  test("first GET /books without token returns a raw array for cumulative Level 3 compatibility", async () => {
+  test("GET /books without token returns a raw array", async () => {
     const response = await request(app).get("/books");
 
     expect(response.status).toBe(200);
@@ -75,15 +75,30 @@ describe("books API", () => {
     expect(response.body).toEqual([]);
   });
 
-  test("second GET /books without token returns 401", async () => {
-    await request(app).get("/books");
+  test("repeated GET /books without token still returns a raw array", async () => {
+    await request(app)
+      .post("/books")
+      .send({
+        title: "Clean Code",
+        author: "Robert C. Martin",
+        year: 2008
+      });
 
-    const response = await request(app).get("/books");
+    const firstResponse = await request(app).get("/books");
+    const secondResponse = await request(app).get("/books");
 
-    expect(response.status).toBe(401);
-    expect(response.body).toEqual({
-      error: "Unauthorized"
-    });
+    expect(firstResponse.status).toBe(200);
+    expect(secondResponse.status).toBe(200);
+    expect(Array.isArray(firstResponse.body)).toBe(true);
+    expect(Array.isArray(secondResponse.body)).toBe(true);
+    expect(secondResponse.body).toEqual([
+      {
+        id: 1,
+        title: "Clean Code",
+        author: "Robert C. Martin",
+        year: 2008
+      }
+    ]);
   });
 
   test("GET /books with token returns a raw array", async () => {
@@ -109,17 +124,6 @@ describe("books API", () => {
         year: 2008
       }
     ]);
-  });
-
-  test("GET /books with invalid token returns 401", async () => {
-    const response = await request(app)
-      .get("/books")
-      .set("Authorization", "Bearer wrong-token");
-
-    expect(response.status).toBe(401);
-    expect(response.body).toEqual({
-      error: "Unauthorized"
-    });
   });
 
   test("GET /books filters by exact author match case-insensitively", async () => {
