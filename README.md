@@ -92,6 +92,51 @@ Expected:
 {}
 ```
 
+### `POST /books`
+
+Creates a book and returns the raw created object. This endpoint intentionally does not use the standard response wrapper because API Quest Level 3 expects raw JSON.
+
+Manual test:
+
+```bash
+curl -X POST http://localhost:3000/books \
+  -H "Content-Type: application/json" \
+  -d "{\"title\":\"Clean Code\",\"author\":\"Robert C. Martin\",\"year\":2008}"
+```
+
+Expected status:
+
+```http
+201 Created
+```
+
+Expected body:
+
+```json
+{
+  "id": 1,
+  "title": "Clean Code",
+  "author": "Robert C. Martin",
+  "year": 2008
+}
+```
+
+### `GET /books`
+
+Returns a raw array.
+
+```bash
+curl http://localhost:3000/books
+```
+
+### `GET /books/:id`
+
+Returns one raw book object.
+
+```bash
+curl http://localhost:3000/books/1
+```
+
 ### Unknown Route
 
 Returns:
@@ -269,6 +314,11 @@ curl https://your-api-url.com/ping
 curl -X POST https://your-api-url.com/echo \
   -H "Content-Type: application/json" \
   -d "{\"hello\":\"world\"}"
+curl -X POST https://your-api-url.com/books \
+  -H "Content-Type: application/json" \
+  -d "{\"title\":\"Clean Code\",\"author\":\"Robert C. Martin\",\"year\":2008}"
+curl https://your-api-url.com/books
+curl https://your-api-url.com/books/1
 curl "https://your-api-url.com/items?page=1&limit=10"
 curl https://your-api-url.com/protected \
   -H "Authorization: Bearer api-quest-secret"

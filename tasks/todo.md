@@ -440,3 +440,91 @@ Manual local checks on port `3105`:
 | --- | --- |
 | `POST /echo` with `{"hello":"world"}` | 200, `{"hello":"world"}` |
 | `POST /echo` with `{}` | 200, `{}` |
+
+## Correction: Level 3 Books Endpoint
+
+- [x] Implement exact `POST /books` route.
+- [x] Implement exact `GET /books` route returning a raw array.
+- [x] Implement exact `GET /books/:id` route returning a raw book object.
+- [x] Use numeric `id` values.
+- [x] Do not wrap book responses in the standard response format.
+- [x] Test created book response shape.
+- [x] Test list response is an array.
+- [x] Test get-by-id response shape.
+- [x] Verify locally with curl-style requests.
+
+### Books Endpoint Contract
+
+Create:
+
+```http
+POST /books
+```
+
+Request:
+
+```json
+{
+  "title": "Clean Code",
+  "author": "Robert C. Martin",
+  "year": 2008
+}
+```
+
+Response:
+
+```http
+201 Created
+```
+
+```json
+{
+  "id": 1,
+  "title": "Clean Code",
+  "author": "Robert C. Martin",
+  "year": 2008
+}
+```
+
+List:
+
+```http
+GET /books
+```
+
+Response must be a raw array:
+
+```json
+[
+  {
+    "id": 1,
+    "title": "Clean Code",
+    "author": "Robert C. Martin",
+    "year": 2008
+  }
+]
+```
+
+### Books Verification
+
+Automated:
+
+```bash
+npm test
+```
+
+Result:
+
+```text
+Test Suites: 7 passed, 7 total
+Tests: 30 passed, 30 total
+```
+
+Manual local checks on port `3106`:
+
+| Check | Result |
+| --- | --- |
+| `POST /books` | 201, raw book with numeric `id` |
+| `GET /books` | 200, raw array |
+| `GET /books/1` | 200, raw book object |
+| `GET /books/999` | 404 |
