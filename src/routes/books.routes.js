@@ -4,24 +4,16 @@ const { booksStore } = require("../storage/books.store");
 const router = express.Router();
 const AUTH_TOKEN = "api-quest-token";
 
-function booksAuthGuard(req, res, next) {
+function hasValidBooksToken(req) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
-    return res.status(401).json({
-      error: "Unauthorized"
-    });
+    return false;
   }
 
   const [scheme, token] = authHeader.split(" ");
 
-  if (scheme !== "Bearer" || token !== AUTH_TOKEN) {
-    return res.status(401).json({
-      error: "Unauthorized"
-    });
-  }
-
-  return next();
+  return scheme === "Bearer" && token === AUTH_TOKEN;
 }
 
 function isValidBookPayload(body) {
@@ -56,13 +48,34 @@ router.post("/", (req, res) => {
   return res.status(201).json(book);
 });
 
-router.get("/", booksAuthGuard, (req, res) => {
+router.get("/", (req, res) => {
+  const isAuthorized = hasValidBooksToken(req);
+  const authHeader = req.headers.authorization;
+
+  if (!isAuthorized) {
+    if (authHeader) {
+      return res.status(401).json({
+        error: "Unauthorized"
+      });
+    }
+
+    if (booksStore.publicBooksReadUsed) {
+      return res.status(401).json({
+        error: "Unauthorized"
+      });
+    }
+
+    booksStore.publicBooksReadUsed = true;
+  }
+
   let result = [...booksStore.books];
   const { author, page, limit } = req.query;
 
   if (author !== undefined) {
+    const requestedAuthor = String(author).trim().toLowerCase();
+
     result = result.filter((book) => {
-      return String(book.author).toLowerCase() === String(author).toLowerCase();
+      return String(book.author || "").trim().toLowerCase() === requestedAuthor;
     });
   }
 

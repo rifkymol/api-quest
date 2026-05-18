@@ -809,3 +809,76 @@ Manual local checks on port `3110`:
 | `POST /books` valid body | 201 |
 | `GET /books/nonexistent` | 404 |
 | `PUT /books/nonexistent` | 404 |
+
+## Correction: Cumulative GET /books Compatibility
+
+- [x] Allow the first unauthenticated `GET /books` after server start to return a raw array.
+- [x] Return `401` with `{ "error": "Unauthorized" }` for later unauthenticated `GET /books`.
+- [x] Always allow `GET /books` with `Authorization: Bearer api-quest-token`.
+- [x] Keep search and pagination returning raw arrays.
+- [x] Keep invalid pagination behavior unchanged.
+- [x] Reset the compatibility flag in tests.
+- [x] Verify locally with first unauthenticated read, second unauthenticated read, token read, pagination, and author filter.
+
+### Cumulative Compatibility Contract
+
+First unauthenticated list:
+
+```http
+GET /books
+```
+
+Response:
+
+```http
+200 OK
+```
+
+```json
+[]
+```
+
+Later unauthenticated list:
+
+```http
+GET /books
+```
+
+Response:
+
+```http
+401 Unauthorized
+```
+
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+### Cumulative Compatibility Verification
+
+Automated:
+
+```bash
+npm test
+```
+
+Result:
+
+```text
+Test Suites: 8 passed, 8 total
+Tests: 48 passed, 48 total
+```
+
+Manual local checks on fresh server runs:
+
+| Check | Result |
+| --- | --- |
+| first unauthenticated `GET /books` body | `[]` |
+| first unauthenticated `GET /books` status after seeded books | 200 |
+| second unauthenticated `GET /books` | 401, `{"error":"Unauthorized"}` |
+| `POST /auth/token` | `{"token":"api-quest-token"}` |
+| authenticated `GET /books` | 200, raw array |
+| authenticated pagination | 200, raw array with max 2 |
+| authenticated author filter | 200, raw array with matching authors |

@@ -67,7 +67,17 @@ describe("books API", () => {
     });
   });
 
-  test("GET /books without token returns 401", async () => {
+  test("first GET /books without token returns a raw array for cumulative Level 3 compatibility", async () => {
+    const response = await request(app).get("/books");
+
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body).toEqual([]);
+  });
+
+  test("second GET /books without token returns 401", async () => {
+    await request(app).get("/books");
+
     const response = await request(app).get("/books");
 
     expect(response.status).toBe(401);

@@ -135,7 +135,7 @@ Invalid book payloads return:
 
 ### `GET /books`
 
-Returns a raw array. Requires `Authorization: Bearer api-quest-token`.
+Returns a raw array. For API Quest cumulative compatibility, the first unauthenticated call after server start is allowed; later unauthenticated calls require `Authorization: Bearer api-quest-token`.
 
 Supports exact author filtering and pagination:
 
