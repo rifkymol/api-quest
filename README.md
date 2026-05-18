@@ -123,10 +123,11 @@ Expected body:
 
 ### `GET /books`
 
-Returns a raw array.
+Returns a raw array. Requires `Authorization: Bearer api-quest-token`.
 
 ```bash
-curl http://localhost:3000/books
+curl http://localhost:3000/books \
+  -H "Authorization: Bearer api-quest-token"
 ```
 
 ### `GET /books/:id`
@@ -273,6 +274,32 @@ curl -X DELETE http://localhost:3000/items/1
 
 Auth uses a fixed bearer token from `API_TOKEN`.
 
+### `POST /auth/token`
+
+Returns the API Quest Level 5 token for exact admin credentials.
+
+```bash
+curl -X POST http://localhost:3000/auth/token \
+  -H "Content-Type: application/json" \
+  -d "{\"username\":\"admin\",\"password\":\"password\"}"
+```
+
+Success:
+
+```json
+{
+  "token": "api-quest-token"
+}
+```
+
+Wrong credentials:
+
+```json
+{
+  "error": "Invalid credentials"
+}
+```
+
 ### `GET /protected`
 
 Manual success test:
@@ -335,7 +362,11 @@ curl -X POST https://your-api-url.com/echo \
 curl -X POST https://your-api-url.com/books \
   -H "Content-Type: application/json" \
   -d "{\"title\":\"Clean Code\",\"author\":\"Robert C. Martin\",\"year\":2008}"
-curl https://your-api-url.com/books
+curl -X POST https://your-api-url.com/auth/token \
+  -H "Content-Type: application/json" \
+  -d "{\"username\":\"admin\",\"password\":\"password\"}"
+curl https://your-api-url.com/books \
+  -H "Authorization: Bearer api-quest-token"
 curl https://your-api-url.com/books/1
 curl -X PUT https://your-api-url.com/books/1 \
   -H "Content-Type: application/json" \

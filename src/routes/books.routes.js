@@ -2,6 +2,27 @@ const express = require("express");
 const { booksStore } = require("../storage/books.store");
 
 const router = express.Router();
+const AUTH_TOKEN = "api-quest-token";
+
+function booksAuthGuard(req, res, next) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({
+      error: "Unauthorized"
+    });
+  }
+
+  const [scheme, token] = authHeader.split(" ");
+
+  if (scheme !== "Bearer" || token !== AUTH_TOKEN) {
+    return res.status(401).json({
+      error: "Unauthorized"
+    });
+  }
+
+  return next();
+}
 
 router.post("/", (req, res) => {
   const { title, author, year } = req.body;
@@ -18,7 +39,7 @@ router.post("/", (req, res) => {
   return res.status(201).json(book);
 });
 
-router.get("/", (req, res) => {
+router.get("/", booksAuthGuard, (req, res) => {
   return res.status(200).json(booksStore.books);
 });
 

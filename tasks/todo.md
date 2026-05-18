@@ -609,3 +609,74 @@ Manual local checks on port `3107`:
 | `GET /books/1` after update | title is `Dune Updated` |
 | `DELETE /books/1` | 204 |
 | `GET /books/1` after delete | 404 |
+
+## Correction: Level 5 Auth Guard
+
+- [x] Implement exact `POST /auth/token` route.
+- [x] Return raw `{ "token": "api-quest-token" }` for `admin` / `password`.
+- [x] Return raw `{ "error": "Invalid credentials" }` with `401` for wrong credentials.
+- [x] Protect only `GET /books`.
+- [x] Return raw `{ "error": "Unauthorized" }` with `401` for missing/invalid token on `GET /books`.
+- [x] Keep `GET /books` successful response as a raw array when token is valid.
+- [x] Do not protect `POST /books`, `GET /books/:id`, `PUT /books/:id`, or `DELETE /books/:id`.
+- [x] Verify locally with token success, wrong credentials, missing token, and valid token list.
+
+### Auth Token Contract
+
+```http
+POST /auth/token
+```
+
+Request:
+
+```json
+{
+  "username": "admin",
+  "password": "password"
+}
+```
+
+Response:
+
+```json
+{
+  "token": "api-quest-token"
+}
+```
+
+### Protected Books List Contract
+
+```http
+GET /books
+Authorization: Bearer api-quest-token
+```
+
+Response remains a raw array:
+
+```json
+[]
+```
+
+### Auth Guard Verification
+
+Automated:
+
+```bash
+npm test
+```
+
+Result:
+
+```text
+Test Suites: 8 passed, 8 total
+Tests: 40 passed, 40 total
+```
+
+Manual local checks on port `3108`:
+
+| Check | Result |
+| --- | --- |
+| `POST /auth/token` with correct credentials | 200, `{"token":"api-quest-token"}` |
+| `POST /auth/token` with wrong password | 401, `{"error":"Invalid credentials"}` |
+| `GET /books` without token | 401, `{"error":"Unauthorized"}` |
+| `GET /books` with `Bearer api-quest-token` | 200, raw array |

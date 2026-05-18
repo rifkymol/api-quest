@@ -25,7 +25,16 @@ describe("books API", () => {
     });
   });
 
-  test("GET /books returns a raw array", async () => {
+  test("GET /books without token returns 401", async () => {
+    const response = await request(app).get("/books");
+
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({
+      error: "Unauthorized"
+    });
+  });
+
+  test("GET /books with token returns a raw array", async () => {
     await request(app)
       .post("/books")
       .send({
@@ -34,7 +43,9 @@ describe("books API", () => {
         year: 2008
       });
 
-    const response = await request(app).get("/books");
+    const response = await request(app)
+      .get("/books")
+      .set("Authorization", "Bearer api-quest-token");
 
     expect(response.status).toBe(200);
     expect(Array.isArray(response.body)).toBe(true);
@@ -46,6 +57,17 @@ describe("books API", () => {
         year: 2008
       }
     ]);
+  });
+
+  test("GET /books with invalid token returns 401", async () => {
+    const response = await request(app)
+      .get("/books")
+      .set("Authorization", "Bearer wrong-token");
+
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({
+      error: "Unauthorized"
+    });
   });
 
   test("GET /books/:id returns one raw book object", async () => {
