@@ -76,4 +76,111 @@ describe("books API", () => {
       error: "Book not found"
     });
   });
+
+  test("PUT /books/:id updates a book and returns the raw updated object", async () => {
+    await request(app)
+      .post("/books")
+      .send({
+        title: "Dune",
+        author: "Frank Herbert",
+        year: 1965
+      });
+
+    const response = await request(app)
+      .put("/books/1")
+      .send({
+        title: "Dune Updated",
+        author: "Frank Herbert",
+        year: 1965
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      id: 1,
+      title: "Dune Updated",
+      author: "Frank Herbert",
+      year: 1965
+    });
+  });
+
+  test("GET /books/:id confirms an update persisted", async () => {
+    await request(app)
+      .post("/books")
+      .send({
+        title: "Dune",
+        author: "Frank Herbert",
+        year: 1965
+      });
+
+    await request(app)
+      .put("/books/1")
+      .send({
+        title: "Dune Updated",
+        author: "Frank Herbert",
+        year: 1965
+      });
+
+    const response = await request(app).get("/books/1");
+
+    expect(response.status).toBe(200);
+    expect(response.body.title).toBe("Dune Updated");
+  });
+
+  test("PUT /books/:id returns raw 404 for missing books", async () => {
+    const response = await request(app)
+      .put("/books/999")
+      .send({
+        title: "Dune Updated",
+        author: "Frank Herbert",
+        year: 1965
+      });
+
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({
+      error: "Book not found"
+    });
+  });
+
+  test("DELETE /books/:id deletes a book with no response body", async () => {
+    await request(app)
+      .post("/books")
+      .send({
+        title: "Dune",
+        author: "Frank Herbert",
+        year: 1965
+      });
+
+    const response = await request(app).delete("/books/1");
+
+    expect(response.status).toBe(204);
+    expect(response.text).toBe("");
+  });
+
+  test("GET /books/:id returns 404 after a book is deleted", async () => {
+    await request(app)
+      .post("/books")
+      .send({
+        title: "Dune",
+        author: "Frank Herbert",
+        year: 1965
+      });
+
+    await request(app).delete("/books/1");
+
+    const response = await request(app).get("/books/1");
+
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({
+      error: "Book not found"
+    });
+  });
+
+  test("DELETE /books/:id returns raw 404 for missing books", async () => {
+    const response = await request(app).delete("/books/999");
+
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({
+      error: "Book not found"
+    });
+  });
 });

@@ -528,3 +528,84 @@ Manual local checks on port `3106`:
 | `GET /books` | 200, raw array |
 | `GET /books/1` | 200, raw book object |
 | `GET /books/999` | 404 |
+
+## Correction: Level 4 Book Update/Delete
+
+- [x] Implement exact `PUT /books/:id` route.
+- [x] Implement exact `DELETE /books/:id` route.
+- [x] Preserve numeric `id` on update.
+- [x] Persist updates in the same books array.
+- [x] Remove deleted books from the same books array.
+- [x] Return `204` with no body for successful delete.
+- [x] Return raw `{ "error": "Book not found" }` for missing update/delete targets.
+- [x] Verify locally with curl-style create, update, get, delete, get sequence.
+
+### Book Update/Delete Contract
+
+Update:
+
+```http
+PUT /books/1
+```
+
+Request:
+
+```json
+{
+  "title": "Dune Updated",
+  "author": "Frank Herbert",
+  "year": 1965
+}
+```
+
+Response:
+
+```http
+200 OK
+```
+
+```json
+{
+  "id": 1,
+  "title": "Dune Updated",
+  "author": "Frank Herbert",
+  "year": 1965
+}
+```
+
+Delete:
+
+```http
+DELETE /books/1
+```
+
+Response:
+
+```http
+204 No Content
+```
+
+### Book Update/Delete Verification
+
+Automated:
+
+```bash
+npm test
+```
+
+Result:
+
+```text
+Test Suites: 7 passed, 7 total
+Tests: 36 passed, 36 total
+```
+
+Manual local checks on port `3107`:
+
+| Check | Result |
+| --- | --- |
+| `POST /books` | 201 |
+| `PUT /books/1` | 200 |
+| `GET /books/1` after update | title is `Dune Updated` |
+| `DELETE /books/1` | 204 |
+| `GET /books/1` after delete | 404 |

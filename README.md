@@ -137,6 +137,24 @@ Returns one raw book object.
 curl http://localhost:3000/books/1
 ```
 
+### `PUT /books/:id`
+
+Updates a book and returns the raw updated object.
+
+```bash
+curl -X PUT http://localhost:3000/books/1 \
+  -H "Content-Type: application/json" \
+  -d "{\"title\":\"Dune Updated\",\"author\":\"Frank Herbert\",\"year\":1965}"
+```
+
+### `DELETE /books/:id`
+
+Deletes a book and returns `204 No Content`.
+
+```bash
+curl -X DELETE http://localhost:3000/books/1
+```
+
 ### Unknown Route
 
 Returns:
@@ -319,6 +337,10 @@ curl -X POST https://your-api-url.com/books \
   -d "{\"title\":\"Clean Code\",\"author\":\"Robert C. Martin\",\"year\":2008}"
 curl https://your-api-url.com/books
 curl https://your-api-url.com/books/1
+curl -X PUT https://your-api-url.com/books/1 \
+  -H "Content-Type: application/json" \
+  -d "{\"title\":\"Dune Updated\",\"author\":\"Frank Herbert\",\"year\":1965}"
+curl -X DELETE https://your-api-url.com/books/1
 curl "https://your-api-url.com/items?page=1&limit=10"
 curl https://your-api-url.com/protected \
   -H "Authorization: Bearer api-quest-secret"
