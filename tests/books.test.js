@@ -67,15 +67,27 @@ describe("books API", () => {
     });
   });
 
-  test("GET /books without token returns a raw array", async () => {
+  test("GET /books without token returns 401", async () => {
     const response = await request(app).get("/books");
 
-    expect(response.status).toBe(200);
-    expect(Array.isArray(response.body)).toBe(true);
-    expect(response.body).toEqual([]);
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({
+      error: "Unauthorized"
+    });
   });
 
-  test("repeated GET /books without token still returns a raw array", async () => {
+  test("GET /books with invalid token returns 401", async () => {
+    const response = await request(app)
+      .get("/books")
+      .set("Authorization", "Bearer wrong-token");
+
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({
+      error: "Unauthorized"
+    });
+  });
+
+  test("GET /books with token returns a raw array", async () => {
     await request(app)
       .post("/books")
       .send({
@@ -84,14 +96,13 @@ describe("books API", () => {
         year: 2008
       });
 
-    const firstResponse = await request(app).get("/books");
-    const secondResponse = await request(app).get("/books");
+    const response = await request(app)
+      .get("/books")
+      .set("Authorization", "Bearer api-quest-token");
 
-    expect(firstResponse.status).toBe(200);
-    expect(secondResponse.status).toBe(200);
-    expect(Array.isArray(firstResponse.body)).toBe(true);
-    expect(Array.isArray(secondResponse.body)).toBe(true);
-    expect(secondResponse.body).toEqual([
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body).toEqual([
       {
         id: 1,
         title: "Clean Code",
@@ -101,7 +112,16 @@ describe("books API", () => {
     ]);
   });
 
-  test("GET /books with token returns a raw array", async () => {
+  test("GET /books can still return an empty raw array with token", async () => {
+    const response = await request(app)
+      .get("/books")
+      .set("Authorization", "Bearer api-quest-token");
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([]);
+  });
+
+  test("GET /books with token returns created books as a raw array", async () => {
     await request(app)
       .post("/books")
       .send({

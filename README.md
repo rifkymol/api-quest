@@ -135,7 +135,7 @@ Invalid book payloads return:
 
 ### `GET /books`
 
-Returns a raw array. Token headers are accepted, but this endpoint also works without auth so cumulative create/read tests remain deterministic.
+Returns a raw array. Requires `Authorization: Bearer api-quest-token`.
 
 Supports exact author filtering and pagination:
 

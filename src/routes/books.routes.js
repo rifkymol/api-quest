@@ -2,6 +2,19 @@ const express = require("express");
 const { booksStore } = require("../storage/books.store");
 
 const router = express.Router();
+const AUTH_TOKEN = "api-quest-token";
+
+function hasValidBooksToken(req) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return false;
+  }
+
+  const [scheme, token] = authHeader.split(" ");
+
+  return scheme === "Bearer" && token === AUTH_TOKEN;
+}
 
 function isValidBookPayload(body) {
   return (
@@ -36,6 +49,12 @@ router.post("/", (req, res) => {
 });
 
 router.get("/", (req, res) => {
+  if (!hasValidBooksToken(req)) {
+    return res.status(401).json({
+      error: "Unauthorized"
+    });
+  }
+
   let result = [...booksStore.books];
   const { author, page, limit } = req.query;
 

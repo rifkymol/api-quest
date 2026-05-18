@@ -861,3 +861,70 @@ Manual local checks on fresh server runs:
 | `GET /books/1` | 200 |
 | unauthenticated pagination | 200, raw array with max 2 |
 | unauthenticated author filter | 200, raw array with matching authors |
+
+## Correction: Restore Level 5 Books Auth
+
+- [x] Return `401` with `{ "error": "Unauthorized" }` for `GET /books` without token.
+- [x] Return `401` with `{ "error": "Unauthorized" }` for `GET /books` with invalid token.
+- [x] Return `200` raw array for `GET /books` with `Authorization: Bearer api-quest-token`.
+- [x] Keep `POST /auth/token` response unchanged.
+- [x] Keep search and pagination working with token.
+
+### Strict Books Auth Contract
+
+Missing token:
+
+```http
+GET /books
+```
+
+Response:
+
+```http
+401 Unauthorized
+```
+
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+Valid token:
+
+```http
+GET /books
+Authorization: Bearer api-quest-token
+```
+
+Response:
+
+```json
+[]
+```
+
+### Strict Books Auth Verification
+
+Automated:
+
+```bash
+npm test
+```
+
+Result:
+
+```text
+Test Suites: 8 passed, 8 total
+Tests: 49 passed, 49 total
+```
+
+Manual local checks on port `3114`:
+
+| Check | Result |
+| --- | --- |
+| `GET /books` without token | 401, `{"error":"Unauthorized"}` |
+| `POST /auth/token` correct credentials | 200, `{"token":"api-quest-token"}` |
+| `POST /auth/token` wrong credentials | 401 |
+| `GET /books` with token | 200, raw array |
+| `GET /books?page=1&limit=2` with token | 200, raw array |
+| `GET /books?author=George%20Orwell` with token | 200, raw array |

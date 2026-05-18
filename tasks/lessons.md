@@ -8,3 +8,4 @@
 - For protected query levels, keep the auth guard and successful raw response shape while changing only the selection logic. Filtering and pagination should operate on a copied array before returning raw JSON.
 - For error-handling levels, patch only the failing validation path when 404 behavior already passes. Validate before mutating in-memory stores so bad requests do not consume IDs or create partial records.
 - Avoid request-count-dependent behavior for challenge compatibility. Testers rerun levels and service state persists, so public endpoints like `GET /books` must be deterministic across repeated calls.
+- When a screenshot shows the active gate, optimize for that exact failing contract. For Level 5, `GET /books` must return 401 without a valid token even if earlier levels previously needed a raw public array.
